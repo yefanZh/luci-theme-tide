@@ -1,0 +1,15 @@
+{# SPDX-License-Identifier: Apache-2.0 #}
+{% if (theme != 'tide'): %}
+	{% include('admin_status/index') %}
+{% else %}
+	{% include('header') %}
+	<div id="view">
+		<div class="spinning">{{ _('Loading view…') }}</div>
+	</div>
+	<script>
+		L.require('ui').then(function(ui) {
+			ui.instantiateView('tide/overview');
+		});
+	</script>
+	{% include('footer') %}
+{% endif %}

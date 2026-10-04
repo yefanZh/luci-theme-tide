@@ -15,6 +15,12 @@ return baseclass.extend({
 	render: function(tree) {
 		var nav = document.getElementById('tide-navigation');
 		if (!nav) return;
+		/* LuCI caches UCI-dependent menu visibility. Keep our route stable and
+		 * expose its title only in Tide's navigation, after ACL filtering. */
+		var tideNode = tree.children && tree.children.admin && tree.children.admin.children
+			&& tree.children.admin.children.status && tree.children.admin.children.status.children
+			&& tree.children.admin.children.status.children.tide;
+		if (tideNode && tideNode.satisfied) tideNode.title = 'Tide Overview';
 		var request = L.env.requestpath || [], dispatch = L.env.dispatchpath || request;
 		var modes = ui.menu.getChildren(tree);
 		var mode = modes.find(function(child) { return child.name === request[0]; }) || modes[0];

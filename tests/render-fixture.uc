@@ -1,7 +1,7 @@
 // Render the actual theme templates with explicit test-only board data.
 global.media = '/luci-static/tide';
 global.resource = '/luci-static/resources';
-global.theme = 'tide';
+global.theme = fixture_page == 'fallback' ? 'bootstrap' : 'tide';
 global.blank_page = false;
 global.css = null;
 global.node = {title:'Tide Overview'};
@@ -18,11 +18,14 @@ global._ = (s)=>s;
 global.striptags = (s)=>replace(s, /<[^>]*>/g, '');
 global.entityencode = (s)=>replace(replace(replace(replace(`${s}`, '&','&amp;'),'<','&lt;'),'>','&gt;'),'"','&quot;');
 global.include = function(path, scope) {
+	if (path == 'admin_status/index') { print('<div id="native-status">Native status fixture</div>'); return; }
 	let template = path in ['header','footer'] ? `themes/tide/${path}` : path;
 	call(loadfile(`${template_root}/${template}.ut`,{raw_mode:false}),null,scope ?? {});
 };
 if (fixture_page == 'login') {
 	include('themes/tide/sysauth');
+} else if (fixture_page in ['route','fallback']) {
+	include('themes/tide/overview');
 } else {
 	include('header');
 	print('<div id="view"><div class="spinning">Loading view…</div></div>');

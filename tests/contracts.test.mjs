@@ -15,9 +15,12 @@ test('LuCI module factories parse with their required bindings',()=>{
 test('dashboard keeps the native status route and existing ACL boundaries',()=>{
   const menu=JSON.parse(read('root/usr/share/luci/menu.d/luci-theme-tide.json'));
   assert.deepEqual(Object.keys(menu),['admin/status/tide']);
-  assert.equal(menu['admin/status/tide'].depends.uci.luci.main.mediaurlbase,'/luci-static/tide');
+  assert.equal(menu['admin/status/tide'].depends.uci,undefined,'theme changes must not depend on cached UCI predicates');
+  assert.equal(menu['admin/status/tide'].title,undefined,'other themes must not show the Tide entry');
+  assert.equal(menu['admin/status/tide'].firstchild_ineligible,true);
   assert.deepEqual(menu['admin/status/tide'].depends.acl,['luci-mod-status-index']);
-  assert.equal(menu['admin/status/tide'].action.path,'tide/overview');
+  assert.equal(menu['admin/status/tide'].action.path,'themes/tide/overview');
+  assert.ok(read('ucode/template/themes/tide/overview.ut').includes("include('admin_status/index')"));
   assert.equal(fs.existsSync(path.join(root,'root/usr/share/rpcd/acl.d')),false);
 });
 test('installation registers Tide idempotently without switching an existing theme',()=>{
@@ -56,6 +59,9 @@ test('native ucode compiles and renders shell and login templates',{skip:!proces
   assert.ok(!html.includes('class="labbar"'));
   assert.ok(login.includes('name="luci_password"'));
   assert.ok(login.includes('method="post"'));
+  assert.ok(renderFixture('route').includes("ui.instantiateView('tide/overview')"));
+  assert.ok(renderFixture('fallback').includes('id="native-status"'));
+  assert.ok(!renderFixture('fallback').includes("ui.instantiateView('tide/overview')"));
 });
 function luminance(hex) {
   const rgb=hex.replace('#','').match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);

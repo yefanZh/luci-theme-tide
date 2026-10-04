@@ -1,11 +1,10 @@
 {
   "admin/status/tide": {
-    "title": "Tide Overview",
     "order": 0,
-    "action": { "type": "view", "path": "tide/overview" },
+    "firstchild_ineligible": true,
+    "action": { "type": "template", "path": "themes/tide/overview" },
     "depends": {
-      "acl": [ "luci-mod-status-index" ],
-      "uci": { "luci": { "main": { "mediaurlbase": "/luci-static/tide" } } }
+      "acl": [ "luci-mod-status-index" ]
     }
   }
 }

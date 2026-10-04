@@ -52,6 +52,7 @@ var tree = {children:{admin:page('Administration',{
 	network:page('网络',{network:page('接口'),wireless:page('无线')},1),
 	services:page('服务',plugins,2),system:page('系统',{system:page('系统设置'),logout:page('退出')},3)
 })}};
+delete tree.children.admin.children.status.children.tide.title;
 L.require = function(name) { return name === 'menu-tide' ? fixtureMenuPromise : Promise.resolve({}); };
 var factory = function(source,base) { return new Function('view','rpc','network','poll','ui','dom','baseclass',source)({extend:function(value){return value;}},rpc,network,poll,ui,dom,{extend:function(value){return value;}}); };
 var fixtureMenuPromise = fetch('/luci-static/resources/menu-tide.js').then(function(r){return r.text();}).then(function(source){
