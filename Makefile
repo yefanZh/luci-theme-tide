@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2026 yefan ZHANG <https://github.com/zhangyefan/luci-theme-tide>
+# Copyright (C) 2026 yefan ZHANG <https://github.com/yefanZh/luci-theme-tide>
 #
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
@@ -7,6 +7,9 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Tide Theme
+LUCI_NAME:=luci-theme-tide
+LUCI_MAINTAINER:=yefan ZHANG
+LUCI_URL:=https://github.com/yefanZh/luci-theme-tide
 LUCI_DESCRIPTION:=Tide (澜) is an elegant, modern, high-contrast theme for LuCI featuring Ocean Blue and Graphite-Amber aesthetics.
 LUCI_DEPENDS:=+luci-base +luci-mod-status
 LUCI_PKGARCH:=all
