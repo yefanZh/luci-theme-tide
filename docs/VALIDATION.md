@@ -8,7 +8,7 @@
 - header / footer / sysauth 模板环境及 ui.menu.getChildren()。
 - network.getWANNetworks() / getWAN6Networks() / getWifiNetworks()、设备 RX/TX 计数器、关联列表。
 - 原有状态 ACL、UCI 菜单条件和 luci.mk 安装路径。
-- 官方 SDK 镜像 ghcr.io/openwrt/sdk:x86_64-25.12.0 存在；工作流使用官方 SDK action。
+- 工作流使用官方 SDK action 及 ghcr.io/openwrt/sdk:aarch64_generic-25.12.0，匹配用户的 ARM64 路由器。
 
 主题总览注册为 admin/status/tide，路由不依赖 LuCI 缓存的 UCI 条件；澜导航在权限过滤后显示它。在其他主题下直接访问此路由会显示原生总览。原生状态路径未覆盖，插件扩展状态仍可通过原生总览访问。
 
@@ -20,6 +20,7 @@
 - 主题注册脚本通过 shell 语法、首次注册和重复注册测试。
 - Makefile 使用一次 LuCI 构建规则，包生成只调用一次。
 - SDK feed 将提交的源码放到 luci-theme-tide 子目录。回归检查使用 OpenWrt 扫描器相同的路径提取规则，避免根目录 Makefile 被误解析而缺少 feed 索引。
+- 修复 feed 目录后，x86_64 SDK 的实际构建已经成功；打包日志确认主题与中文翻译均为 arch:noarch，未上传 SDK 构建的 x86 依赖包。随后工作流切换至 ARM64 SDK 复验；Release 将采用该 ARM64 构建产物。
 - 浏览器测试使用上游 LuCI DOM 工具与 mock RPC，不是路由器上的真实后台。
 - 明暗同 DOM、同尺寸、同输入；快速切换无未处理的过渡取消异常。
 - 45 个插件菜单、深层分组、长中文标题、权限过滤、中部滚动、设备信息固定。

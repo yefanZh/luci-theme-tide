@@ -19,7 +19,7 @@ jobs:
       - name: Build theme and Chinese translation with official SDK
         uses: openwrt/gh-action-sdk@f5813d30eeef3534b58ac7e79c5d8842b6035434
         env:
-          ARCH: x86_64-25.12.0
+          ARCH: aarch64_generic-25.12.0
           CONTAINER: ghcr.io/openwrt/sdk
           PACKAGES: luci-theme-tide
           FEED_DIR: ${{ runner.temp }}/tide-feed
