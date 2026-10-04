@@ -1,0 +1,15 @@
+{% if (!blank_page): %}
+			</main>
+			<footer class="tide-footer">
+				<span><a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }} ({{ version.luciversion }})</a> / <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})</a>{% if (lua_active): %} / {{ _('Lua compatibility mode active') }}{% endif %}</span>
+				<ul class="breadcrumb" id="modemenu" style="display:none"></ul>
+			</footer>
+		</div>
+	</div>
+	<button type="button" class="tide-nav-overlay" aria-label="{{ _('Close menu') }}" tabindex="-1" hidden></button>
+	<script>L.require('menu-tide');</script>
+{% endif %}
+	<div id="tide-loadline" role="progressbar" aria-label="{{ _('Loading') }}" hidden></div>
+	<div id="tide-announcement" class="tide-sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

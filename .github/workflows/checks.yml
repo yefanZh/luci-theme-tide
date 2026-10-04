@@ -1,0 +1,37 @@
+name: Theme checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build native ucode and fetch LuCI reference
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libjson-c-dev
+          git clone https://github.com/jow-/ucode.git /tmp/tide-ucode
+          git -C /tmp/tide-ucode checkout c05d2187547b309f64c5429739b2dfdc891c5d0c
+          cmake -S /tmp/tide-ucode -B /tmp/tide-ucode/build -DUBUS_SUPPORT=OFF -DUCI_SUPPORT=OFF -DULOOP_SUPPORT=OFF -DRTNL_SUPPORT=OFF -DNL80211_SUPPORT=OFF -DDIGEST_SUPPORT=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build /tmp/tide-ucode/build -j2
+          git clone --depth 1 --branch openwrt-25.12 https://github.com/openwrt/luci.git /tmp/tide-luci
+      - run: npm test && npm run test:browser
+        env:
+          UCODE_BIN: /tmp/tide-ucode/build/ucode
+          LUCI_REFERENCE: /tmp/tide-luci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-checks
+          path: test-results/

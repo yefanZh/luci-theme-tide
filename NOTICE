@@ -1,0 +1,15 @@
+澜 TIDE
+Copyright 2026 yefan ZHANG
+
+htdocs/luci-static/tide/compat.css derives from the LuCI Bootstrap theme.
+Copyright 2012 Nut & Bolt / David Menting; based on Bootstrap v1.4.0,
+Copyright 2011 Twitter, Inc. Licensed under Apache-2.0.
+Source: openwrt/luci, branch openwrt-25.12,
+commit 2858f8d98b270bd3baf30a1d19c6e26df22c3197.
+
+LuCI template integration follows the official Bootstrap templates.
+Copyright 2008 Steven Barth, 2012 David Menting,
+2008-2022 Jo-Philipp Wich. Licensed under Apache-2.0.
+
+Manrope is distributed under the SIL Open Font License 1.1.
+The font and its full license are in htdocs/luci-static/tide/fonts/.

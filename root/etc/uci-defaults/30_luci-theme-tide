@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Register without replacing an administrator's selected theme.
+if [ "$(uci -q get luci.themes.Tide)" != /luci-static/tide ]; then
+	uci set luci.themes.Tide=/luci-static/tide
+	uci commit luci
+fi
+
+exit 0

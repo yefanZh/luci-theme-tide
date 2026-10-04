@@ -1,0 +1,172 @@
+/* TIDE motion reference. Variables and base components are defined in tide-theme.css. */
+
+.page-enter { animation: page-in 450ms var(--ease); }
+.page-leave { animation: page-out 100ms ease-in both; }
+@keyframes page-in {
+  from { opacity: .45; transform: translateY(12px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes page-out {
+  to { opacity: .15; transform: translateY(-6px); }
+}
+
+button { position: relative; isolation: isolate; }
+.ripple {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  animation: ripple 580ms var(--ease) forwards;
+}
+@keyframes ripple {
+  from { transform: scale(0); opacity: .16; }
+  to   { transform: scale(1); opacity: 0; }
+}
+.click-burst {
+  position: fixed;
+  z-index: 180;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  animation: burst 520ms var(--ease) forwards;
+}
+@keyframes burst {
+  from { transform: translate(0, 0); opacity: .8; }
+  to   { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 0;
+  animation: trace 1000ms var(--ease);
+}
+.chart-line.secondary { stroke: var(--chart-secondary); stroke-width: 1.6; }
+@keyframes trace {
+  from { stroke-dashoffset: 1400; }
+  to   { stroke-dashoffset: 0; }
+}
+.meter span {
+  display: block;
+  width: var(--value);
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  animation: meter 850ms var(--ease);
+}
+@keyframes meter {
+  from { width: 0; }
+  to   { width: var(--value); }
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease);
+}
+::view-transition-old(root) { animation: none; }
+::view-transition-new(root) { animation-name: theme-reveal; }
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--click-x, 50%) var(--click-y, 0)); }
+  to   { clip-path: circle(160vmax at var(--click-x, 50%) var(--click-y, 0)); }
+}
+
+.spinner, .loading-button .icon { animation: spin 800ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton {
+  position: relative;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--line);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffff28, transparent);
+  animation: shimmer 1200ms ease infinite;
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+.loadline {
+  position: fixed;
+  left: 0;
+  top: var(--previewbar);
+  z-index: 150;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.loadline.loading { animation: load 800ms var(--ease) forwards; }
+@keyframes load {
+  0%   { transform: scaleX(0); }
+  65%  { transform: scaleX(.78); }
+  100% { transform: scaleX(1); }
+}
+
+dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0 0 0 auto;
+  width: 385px;
+  max-width: 94vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: -12px 0 55px #0002;
+}
+dialog::backdrop { background: #12232142; backdrop-filter: blur(3px); }
+dialog[open] { animation: drawer-in 450ms var(--ease); }
+.drawer-close-animation { animation: drawer-out 220ms ease-in forwards !important; }
+@keyframes drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes drawer-out { to { transform: translateX(100%); } }
+@keyframes nav-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 29px;
+  z-index: 200;
+  max-width: calc(100% - 30px);
+  padding: 12px 19px;
+  border-radius: 9px;
+  color: var(--panel);
+  background: var(--ink);
+  box-shadow: 0 10px 30px #0002;
+  transform: translate(-50%, 30px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 380ms var(--ease), opacity 200ms;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+body.motion-off *, body.motion-off *::before, body.motion-off *::after {
+  animation: none !important;
+  transition: none !important;
+}
+body.motion-off .ripple, body.motion-off .click-burst { display: none; }
+body.motion-off .loadline.loading { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .ripple, .click-burst { display: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}

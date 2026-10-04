@@ -1,0 +1,12 @@
+{
+  "name": "luci-theme-tide-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/contracts.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "preview": "node tests/server.mjs"
+  },
+  "devDependencies": { "playwright": "1.62.1" },
+  "engines": { "node": ">=20" }
+}

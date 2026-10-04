@@ -1,0 +1,27 @@
+name: OpenWrt 25.12 package
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build theme and Chinese translation with official SDK
+        uses: openwrt/gh-action-sdk@f5813d30eeef3534b58ac7e79c5d8842b6035434
+        env:
+          ARCH: x86_64-25.12.0
+          CONTAINER: ghcr.io/openwrt/sdk
+          PACKAGES: luci-theme-tide
+          V: s
+      - uses: actions/upload-artifact@v4
+        with:
+          name: luci-theme-tide-openwrt-25.12
+          path: |
+            bin/packages/**/luci-theme-tide*.apk
+            bin/packages/**/luci-i18n-tide-zh-cn*.apk
+          if-no-files-found: error

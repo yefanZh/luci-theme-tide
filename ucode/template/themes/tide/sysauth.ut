@@ -1,0 +1,19 @@
+{% include('header', { blank_page: true }) %}
+<main id="maincontent" class="tide-login" tabindex="-1">
+	<div class="tide-login-panel">
+		<img src="{{ media }}/logo.svg" width="44" height="44" alt="">
+		<p class="tide-eyebrow">澜 TIDE / OPENWRT</p>
+		<h1>{{ _('Authorization Required') }}</h1>
+		<p class="tide-muted">{{ _('Please enter your username and password.') }}</p>
+		{% if (fuser): %}<div class="alert-message error" role="alert">{{ _('Invalid username and/or password! Please try again.') }}</div>{% endif %}
+		<form method="post">
+			<label for="luci_username">{{ _('Username') }}</label>
+			<input name="luci_username" id="luci_username" autocomplete="username" value="{{ entityencode(duser ?? 'root', true) }}" required>
+			<label for="luci_password">{{ _('Password') }}</label>
+			<input name="luci_password" id="luci_password" type="password" autocomplete="current-password" autofocus>
+			<button type="submit" class="btn cbi-button-apply">{{ _('Log in') }}</button>
+		</form>
+		<label class="tide-login-appearance">{{ _('Appearance') }} <select class="tide-appearance"><option value="system">{{ _('Follow system') }}</option><option value="light">{{ _('Light') }}</option><option value="dark">{{ _('Dark') }}</option></select></label>
+	</div>
+</main>
+{% include('footer', { blank_page: true }) %}

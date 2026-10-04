@@ -1,0 +1,72 @@
+{#
+ Tide theme. SPDX-License-Identifier: Apache-2.0
+ LuCI integration based on Bootstrap, copyright 2008-2022 the LuCI authors.
+-#}
+{%
+	import { getuid, getspnam } from 'luci.core';
+	const boardinfo = ubus.call('system', 'board') ?? {};
+	http.prepare_content('text/html; charset=UTF-8');
+-%}
+<!DOCTYPE html>
+<html lang="{{ dispatcher.lang }}" class="theme-tide">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="darkreader-lock">
+	<title>{{ striptags(`${boardinfo.hostname ?? 'OpenWrt'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }} · TIDE</title>
+	<script src="{{ media }}/appearance.js"></script>
+	<link rel="stylesheet" href="{{ media }}/compat.css">
+	{% if (node?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">{% endif %}
+	<link rel="stylesheet" href="{{ media }}/cascade.css">
+	<link rel="icon" href="{{ media }}/logo.svg" type="image/svg+xml">
+	{% if (css): %}<style>{{ css }}</style>{% endif %}
+	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+	<script src="{{ resource }}/cbi.js"></script>
+	<script src="{{ media }}/tide.js"></script>
+</head>
+<body class="lang_{{ dispatcher.lang }}{{ blank_page ? ' tide-blank' : '' }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+	<a class="tide-skip" href="#maincontent">{{ _('Skip to content') }}</a>
+	{% if (!blank_page): %}
+	<div class="tide-shell">
+		<aside class="tide-sidebar main-left" id="tide-sidebar" aria-label="{{ _('Main navigation') }}">
+			<div class="tide-brand-row">
+				<a class="tide-brand" href="{{ dispatcher.build_url('admin/status/tide') }}">
+					<img src="{{ media }}/logo.svg" alt="" width="34" height="34">
+					<span><strong>澜 <b>TIDE</b></strong><small>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</small></span>
+				</a>
+				<button type="button" class="tide-icon-button tide-nav-close" aria-label="{{ _('Close menu') }}">×</button>
+			</div>
+			<nav class="tide-nav" id="tide-navigation" aria-label="{{ _('Navigation') }}">
+				<p class="tide-muted tide-menu-status" role="status">{{ _('Loading menu…') }}</p>
+			</nav>
+			<div class="tide-sidebar-bottom">
+				<strong>{{ striptags(boardinfo.hostname ?? 'OpenWrt') }}</strong>
+				<small title="{{ entityencode(boardinfo.model ?? '', true) }}">{{ striptags(boardinfo.model ?? 'OpenWrt') }}</small>
+				<small>{{ striptags(boardinfo.release?.description ?? '') }}</small>
+				<span>澜 TIDE · 1.0</span>
+			</div>
+		</aside>
+		<div class="tide-workspace main-right" id="tide-workspace">
+			<header class="tide-topbar">
+				<div class="tide-context">
+					<button type="button" class="tide-icon-button tide-menu-toggle" aria-label="{{ _('Open menu') }}" aria-expanded="false" aria-controls="tide-sidebar"><svg class="tide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+					<nav id="tide-breadcrumbs" class="tide-breadcrumbs" aria-label="{{ _('Breadcrumb') }}"><span>{{ striptags(dispatched?.title ? _(dispatched.title) : 'LuCI') }}</span></nav>
+				</div>
+				<div class="tide-top-actions">
+					<div id="indicators"></div>
+					<label class="tide-appearance-label"><span class="tide-sr-only">{{ _('Appearance') }}</span><select class="tide-appearance" aria-label="{{ _('Appearance') }}"><option value="system">{{ _('Follow system') }}</option><option value="light">{{ _('Light') }}</option><option value="dark">{{ _('Dark') }}</option></select></label>
+					<button type="button" class="tide-icon-button tide-motion-toggle" aria-pressed="false" aria-label="{{ _('Pause animations') }}" title="{{ _('Pause animations') }}"><svg class="tide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg></button>
+				</div>
+			</header>
+			<main id="maincontent" class="tide-content container" tabindex="-1">
+			{% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+				<div class="alert-message warning"><h4>{{ _('No password set!') }}</h4><p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+				{% if (dispatcher.lookup('admin/system/admin')): %}<a class="btn" href="{{ dispatcher.build_url('admin/system/admin') }}">{{ _('Go to password configuration...') }}</a>{% endif %}</div>
+			{% endif %}
+			{% if (boardinfo.rootfs_type == 'initramfs'): %}
+				<div class="alert-message warning"><h4>{{ _('System running in recovery (initramfs) mode.') }}</h4><p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+				{% if (dispatcher.lookup('admin/system/flash')): %}<a class="btn" href="{{ dispatcher.build_url('admin/system/flash') }}">{{ _('Go to firmware upgrade...') }}</a>{% endif %}</div>
+			{% endif %}
+			<noscript><div class="alert-message warning">{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</div></noscript>
+			<div id="tabmenu" style="display:none"></div>
+	{% endif %}

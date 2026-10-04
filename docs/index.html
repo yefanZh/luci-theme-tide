@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f2f6fb">
+  <title>OpenWrt · 原创 LuCI 主题实验室</title>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body class="theme-tide">
+  <a class="skip" href="#content">跳到主要内容</a>
+  <div class="labbar">
+    <div class="labbrand"><span class="labmark" aria-hidden="true"></span><strong>LuCI / 主题实验室</strong><span class="labdesc">三个原创方向</span></div>
+    <div class="theme-picker" role="group" aria-label="选择主题原型">
+      <button data-theme="tide" aria-pressed="true"><i class="swatch tide"></i><span>澜 TIDE</span></button>
+      <button data-theme="noct" aria-pressed="false"><i class="swatch noct"></i><span>曜 NOCT</span></button>
+      <button data-theme="grove" aria-pressed="false"><i class="swatch grove"></i><span>庭 GROVE</span></button>
+    </div>
+    <button class="lab-motion" id="motionToggle" aria-pressed="true" title="暂停或播放动态效果"><span class="motion-dot"></span><span>动效开启</span></button>
+  </div>
+  <div id="app"></div>
+  <div class="loadline" aria-hidden="true"></div>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+  <div id="toast" role="status"></div>
+  <dialog id="deviceDialog" aria-labelledby="deviceTitle"></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
