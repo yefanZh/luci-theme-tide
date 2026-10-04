@@ -50,6 +50,21 @@ test('Makefile includes one LuCI rule set and invokes package generation once',(
     assert.ok(read('Makefile').includes('LUCI_PKGARCH:=all'));
   } finally {fs.rmSync(temp,{recursive:true,force:true});}
 });
+test('official SDK feed scan discovers the nested theme package',()=>{
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'tide-feed-'));
+  try {
+    const prepared=spawnSync('bash',[path.join(root,'.github/scripts/prepare-sdk-feed.sh'),temp],{cwd:root,encoding:'utf8'});
+    assert.equal(prepared.status,0,prepared.stderr);
+    assert.equal(fs.existsSync(path.join(temp,'Makefile')),false);
+    assert.ok(fs.existsSync(path.join(temp,'luci-theme-tide/Makefile')));
+    // Same discovery and pathname rewriting as OpenWrt 25.12 include/scan.mk.
+    const scan=spawnSync('bash',['-o','pipefail','-c',
+      'find -L "$1" -mindepth 1 -maxdepth 5 -name Makefile | xargs grep -aHE "call (Build/DefaultTargets|BuildPackage|KernelPackage)" | sed -e "s#^$1/##" -e "s#/Makefile:.*##" | uniq',
+      'scan',temp],{encoding:'utf8'});
+    assert.equal(scan.status,0,scan.stderr);
+    assert.equal(scan.stdout.trim(),'luci-theme-tide');
+  } finally {fs.rmSync(temp,{recursive:true,force:true});}
+});
 test('native ucode compiles and renders shell and login templates',{skip:!process.env.UCODE_BIN},()=>{
   const html=renderFixture(), login=renderFixture('login');
   assert.ok(html.includes('href="/cgi-bin/luci/admin/status/tide"'));

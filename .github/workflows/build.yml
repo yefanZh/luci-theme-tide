@@ -14,12 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare a feed containing the committed theme package
+        run: bash .github/scripts/prepare-sdk-feed.sh "$RUNNER_TEMP/tide-feed"
       - name: Build theme and Chinese translation with official SDK
         uses: openwrt/gh-action-sdk@f5813d30eeef3534b58ac7e79c5d8842b6035434
         env:
           ARCH: x86_64-25.12.0
           CONTAINER: ghcr.io/openwrt/sdk
           PACKAGES: luci-theme-tide
+          FEED_DIR: ${{ runner.temp }}/tide-feed
           V: s
       - uses: actions/upload-artifact@v4
         with:
