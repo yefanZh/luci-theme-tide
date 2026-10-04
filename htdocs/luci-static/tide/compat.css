@@ -317,7 +317,7 @@ a:hover {
 }
 
 .nowrap:not(span) {
-/*	Sometimes you need to wrap: badges on narrow screens look weird 
+/*	Sometimes you need to wrap: badges on narrow screens look weird
 	and nowrap defeats other width constraints, so exclude span */
 	white-space: nowrap;
 }
@@ -653,7 +653,7 @@ select,
 }
 
 /* indication line for drag-and-drop in UIDynamicList*/
-.cbi-dynlist > .item.drag-over { 
+.cbi-dynlist > .item.drag-over {
 	border-top: 1px solid var(--text-color-highest);
 }
 

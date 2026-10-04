@@ -1713,25 +1713,25 @@ to {
 /* Confirmed dark mode: palette only;
    TIDE topology stays unchanged. */
 .theme-tide.dark  {
-  
+
  --bg:#1b2023;
    --panel:#242b2f;
    --ink:#ecefe9;
    --muted:#a6b0b2;
-  
+
  --line:#3a4347;
    --accent:#e3b779;
    --soft:#37342e;
    --success:#a6c8ac;
-  
+
  --side:#242b2f;
    --side-ink:#ecefe9;
    --on-accent:#282521;
-  
+
  --hero:#303532;
    --chart-secondary:#9eaab4;
    color-scheme:dark;
-  
+
 }
 
 .theme-tide  {
