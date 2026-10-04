@@ -26,6 +26,8 @@ try {
     assert.equal(await page.locator('.tide-metric-value strong').first().textContent(),'60.8');
     assert.equal(await page.locator('.tide-chart svg').isVisible(),true);
     assert.equal(await page.locator('.tide-meter').getAttribute('aria-valuenow'),'40.6');
+    assert.equal(await page.locator('.tide-meter span').evaluate(el=>getComputedStyle(el).transitionProperty),'transform');
+    assert.equal(await page.locator('.tide-meter span').evaluate(el=>el.offsetWidth===el.parentElement.clientWidth),true);
   });
   await check('45 plugin entries, deep menus, ACL filtering and independent scrolling',async()=>{
     await page.getByRole('button',{name:'服务',exact:true}).click();

@@ -207,7 +207,7 @@ return view.extend({
 		this.resourceContent.firstChild.lastChild.textContent = number(load,2);
 		this.memoryLabel.textContent = bytes(used) + ' / ' + bytes(memTotal);
 		var percent = used != null ? used / memTotal * 100 : 0;
-		this.memoryFill.style.setProperty('--value',percent.toFixed(1) + '%');
+		this.memoryFill.style.setProperty('--value',String(percent / 100));
 		this.memoryMeter.title = percent.toFixed(1) + '%';
 		this.memoryMeter.setAttribute('role','meter'); this.memoryMeter.setAttribute('aria-label',_('Memory usage'));
 		this.memoryMeter.setAttribute('aria-valuemin','0'); this.memoryMeter.setAttribute('aria-valuemax','100'); this.memoryMeter.setAttribute('aria-valuenow',percent.toFixed(1));

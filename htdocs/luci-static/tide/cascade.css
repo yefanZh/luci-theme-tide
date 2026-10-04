@@ -142,10 +142,10 @@ textarea{width:100%;resize:vertical}
 .cbi-dropdown[open]>ul.dropdown>li[selected],.cbi-dropdown[open]>ul.dropdown>li:hover{background:var(--soft);color:var(--accent)}
 .cbi-dynlist>.item{background:var(--soft);border-color:var(--line);color:var(--ink);border-radius:6px;max-width:100%}
 .cbi-select select{padding-top:9px;padding-bottom:9px}
-.alert-message{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:9px;color:var(--ink);padding:15px 18px;margin:0 0 18px;text-shadow:none}
-.alert-message.warning{border-left-color:var(--warning);background:var(--panel);color:var(--ink)}
-.alert-message.error{border-left-color:var(--error);color:var(--error);background:var(--panel)}
-.alert-message.success{border-left-color:var(--success);background:var(--panel);color:var(--success)}
+.alert-message{background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:15px 18px;margin:0 0 18px;text-shadow:none}
+.alert-message.warning{border-color:var(--warning);background:var(--panel);color:var(--ink)}
+.alert-message.error{border-color:var(--error);color:var(--error);background:var(--panel)}
+.alert-message.success{border-color:var(--success);background:var(--panel);color:var(--success)}
 .alert-message h4{font-size:14px;margin:0 0 5px;color:inherit}
 .alert-message p{margin:4px 0 10px}
 #modal_overlay{inset:0;background:#12232166;backdrop-filter:blur(3px)}
@@ -158,7 +158,7 @@ textarea{width:100%;resize:vertical}
 .ifacebox .ifacebox-body{background:var(--panel);color:var(--ink);border-color:var(--line)}
 .ifacebadge,.zonebadge{border-radius:5px;font-size:12px;max-width:100%}
 .cbi-progressbar{height:18px;background:var(--line);border:0;border-radius:4px;overflow:hidden}
-.cbi-progressbar>div{background:var(--accent);transition:width 350ms var(--ease)}
+.cbi-progressbar>div{background:var(--accent)}
 .cbi-progressbar::before{color:var(--ink);font-size:11px;text-shadow:none}
 pre,code{color:var(--ink);background:var(--bg);border-color:var(--line)}
 pre{font-size:12px;max-width:100%;overflow:auto;border-radius:7px}
@@ -210,7 +210,7 @@ pre{font-size:12px;max-width:100%;overflow:auto;border-radius:7px}
 .tide-resource{margin-bottom:15px}.tide-resource:last-child{margin-bottom:0}
 .tide-resource-label{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin-bottom:7px;color:var(--muted)}
 .tide-meter{height:5px;background:var(--line);border-radius:4px;overflow:hidden}
-.tide-meter span{display:block;height:100%;width:var(--value,0%);background:var(--accent);border-radius:4px;transition:width 350ms var(--ease)}
+.tide-meter span{display:block;height:100%;width:100%;background:var(--accent);border-radius:4px;transform:scaleX(var(--value,0));transform-origin:left;transition:transform 350ms var(--ease)}
 .tide-meter.initial span{animation:tide-meter-in 850ms var(--ease)}
 .tide-table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
 .tide-device-table{width:100%;font-size:12px;table-layout:fixed}
@@ -270,7 +270,7 @@ pre{font-size:12px;max-width:100%;overflow:auto;border-radius:7px}
 @keyframes tide-ripple{from{transform:scale(0);opacity:.16}to{transform:scale(1);opacity:0}}
 @keyframes tide-burst{from{transform:translate(0,0);opacity:.8}to{transform:translate(var(--dx),var(--dy));opacity:0}}
 @keyframes tide-trace{from{stroke-dashoffset:var(--path-length)}to{stroke-dashoffset:0}}
-@keyframes tide-meter-in{from{width:0}to{width:var(--value)}}
+@keyframes tide-meter-in{from{transform:scaleX(0)}to{transform:scaleX(var(--value))}}
 @keyframes tide-load{from{transform:translateX(-100%)}to{transform:translateX(390%)}}
 @media(min-width:1600px){main.tide-content.container{padding-top:40px}.tide-panel,.cbi-section{padding:27px}.tide-chart svg{height:175px}}
 @media(max-width:1200px){:root{--sidebar-width:183px}.tide-sidebar{padding:28px 13px 20px;gap:27px}header.tide-topbar{padding:0 25px}main.tide-content.container{padding:28px 25px 24px}.tide-footer{padding-left:25px;padding-right:25px}.tide-overview-grid,.tide-lower-grid{grid-template-columns:minmax(0,1.65fr) minmax(250px,1fr)}.tide-panel,.cbi-section{padding:20px}.tide-metric{padding:0 12px}.tide-metric-value strong{font-size:27px}}
