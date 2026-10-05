@@ -17,7 +17,7 @@
 	<script src="{{ media }}/appearance.js"></script>
 	<link rel="stylesheet" href="{{ media }}/compat.css">
 	{% if (node?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ node.css }}">{% endif %}
-	<link rel="stylesheet" href="{{ media }}/cascade.css?v=refinement-20261005">
+	<link rel="stylesheet" href="{{ media }}/cascade.css?v=modal-center-20261005">
 	<link rel="icon" href="{{ media }}/logo.svg" type="image/svg+xml">
 	{% if (css): %}<style>{{ css }}</style>{% endif %}
 	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>

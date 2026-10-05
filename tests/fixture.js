@@ -95,3 +95,9 @@ fixture.interfaceModal = function() {
 	])));
 	ui.showModal('接口 » lan',[map,E('div',{'class':'button-row'},[E('button',{'class':'btn','click':function(){ui.hideModal();}},['取消']),E('button',{'class':'btn cbi-button-apply','click':function(){}},['保存'])])]);
 };
+
+fixture.applyStatus = function() {
+	var message=ui.showModal('', '');
+	message.classList.add('alert-message','notice');
+	dom.content(message,E('p',{'class':'spinning'},['正在等待配置被应用… 87s（测试提示，不执行配置）']));
+};

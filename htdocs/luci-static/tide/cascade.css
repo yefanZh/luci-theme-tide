@@ -155,8 +155,8 @@ textarea{width:100%;resize:vertical}
 .alert-message.success{border-color:var(--success);background:var(--panel);color:var(--success)}
 .alert-message h4{font-size:14px;margin:0 0 5px;color:inherit}
 .alert-message p{margin:4px 0 10px}
-#modal_overlay{inset:0;background:#12232166;backdrop-filter:blur(3px)}
-.modal{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:25px;box-shadow:0 15px 60px #0002;max-width:960px;min-width:0;width:calc(100% - 34px);animation:tide-page-in 220ms var(--ease)}
+#modal_overlay{inset:0;display:flex;flex-direction:column;align-items:center;padding:24px;background:#12232166;backdrop-filter:blur(3px)}
+.modal{flex-shrink:0;margin:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:25px;box-shadow:0 15px 60px #0002;max-width:960px;min-width:0;width:100%;animation:tide-page-in 220ms var(--ease)}
 .modal h4{font-size:20px}
 .modal pre,.modal textarea{background:var(--bg);color:var(--ink);max-width:100%;overflow:auto}
 .ifacebox{border-color:var(--line);border-radius:9px;background:var(--panel);overflow:hidden}
@@ -294,7 +294,7 @@ pre{font-size:14px;max-width:100%;overflow:auto;border-radius:7px}
  .tide-device-table .hide-mobile{display:none}.tide-device-table th:first-child{width:65%}.tide-device-open{gap:8px}.tide-device-glyph{width:29px;height:29px}
  .cbi-value{display:block;padding:16px 0}.cbi-value label.cbi-value-title{display:block;margin-bottom:7px;padding:0}.cbi-value-field>input,.cbi-value-field>select{width:100%!important}
  .cbi-page-actions{gap:8px;justify-content:stretch}.cbi-page-actions>.cbi-button{flex:1}.cbi-section .cbi-section{padding:15px 12px}
- .modal{padding:20px 17px;margin-top:25px}.tide-login-panel{padding:28px 22px}.table .th,.table .td{padding:10px 7px}.tabs>li>a,.cbi-tabmenu>li>a{padding:8px 16px;font-size:15px}
+ #modal_overlay{padding:12px}.modal{padding:20px 17px;margin:auto}.tide-login-panel{padding:28px 22px}.table .th,.table .td{padding:10px 7px}.tabs>li>a,.cbi-tabmenu>li>a{padding:8px 16px;font-size:15px}
  @keyframes tide-page-in{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 }
 @media(pointer:coarse){.tide-icon-button{width:44px;height:44px;min-height:44px}.tide-nav-children a,.tide-nav-children .tide-nav-group-button{min-height:44px}input[type="checkbox"],input[type="radio"]{min-width:20px;min-height:20px}.cbi-checkbox{min-height:44px;display:inline-flex;align-items:center}.tide-device-open{min-height:44px}}
@@ -312,7 +312,7 @@ body.tide-hidden *{animation-play-state:paused!important}
 .cbi-section-node{min-width:0}.cbi-section .cbi-section{border:0;background:transparent;padding:0}
 .cbi-value-field>input[type="text"],.cbi-value-field>input[type="password"],.cbi-value-field>select{width:min(100%,460px)}
 .cbi-section>.cbi-tabmenu,.modal .cbi-tabmenu{background:var(--bg)}
-.modal.tide-form-modal{width:calc(100% - 48px);max-width:960px;max-height:calc(100dvh - 48px);margin:24px auto;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.modal.tide-form-modal{width:100%;max-width:960px;max-height:calc(100dvh - 48px);margin:auto;padding:0;display:flex;flex-direction:column;overflow:hidden}
 .modal.tide-form-modal>h4{flex-shrink:0;margin:0;padding:24px 28px;font-size:24px;line-height:1.4}
 .modal.tide-form-modal>.cbi-map{min-height:0;overflow:auto;padding:0 28px 10px;margin:0;flex:1}
 .modal.tide-form-modal>.button-row{flex-shrink:0;padding:18px 28px;margin:0;border-top:1px solid var(--line);gap:8px;background:var(--panel)}
@@ -324,9 +324,12 @@ body.tide-hidden *{animation-play-state:paused!important}
 .tide-chart-tooltip{position:absolute;left:50%;top:4px;transform:translateX(-50%);max-width:95%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13px;pointer-events:none;z-index:1}
 .tide-heading-actions .spinning::before{display:none}.tide-heading-actions .spinning>.tide-icon{animation:tide-refresh-spin 800ms linear infinite}
 @keyframes tide-refresh-spin{to{transform:rotate(360deg)}}
-@media(max-width:820px){.modal.tide-form-modal{width:calc(100% - 24px);max-height:calc(100dvh - 24px);margin:12px auto}.modal.tide-form-modal>h4{padding:18px;font-size:21px}.modal.tide-form-modal>.cbi-map{padding:0 18px 10px}.modal.tide-form-modal>.button-row{padding:16px 18px}.tide-page-heading{flex-wrap:wrap}.tide-refresh-group{width:100%;flex-direction:row;justify-content:space-between;align-items:center;gap:10px}.tide-freshness{font-size:12px;text-align:start}.tide-chart svg{height:170px}.cbi-value label.cbi-value-title{text-align:start}.tide-nav-children a,.tide-nav-children .tide-nav-group-button{padding-left:calc(28px + var(--depth,1)*16px)}.tide-breadcrumbs{font-size:13px}.tide-panel-head a{font-size:13px}}
+@media(max-width:820px){.modal.tide-form-modal{width:100%;max-height:calc(100dvh - 24px);margin:auto}.modal.tide-form-modal>h4{padding:18px;font-size:21px}.modal.tide-form-modal>.cbi-map{padding:0 18px 10px}.modal.tide-form-modal>.button-row{padding:16px 18px}.tide-page-heading{flex-wrap:wrap}.tide-refresh-group{width:100%;flex-direction:row;justify-content:space-between;align-items:center;gap:10px}.tide-freshness{font-size:12px;text-align:start}.tide-chart svg{height:170px}.cbi-value label.cbi-value-title{text-align:start}.tide-nav-children a,.tide-nav-children .tide-nav-group-button{padding-left:calc(28px + var(--depth,1)*16px)}.tide-breadcrumbs{font-size:13px}.tide-panel-head a{font-size:13px}}
 
 .tide-tabs-initial::before{transition:none}
 
 /* Overview owns sampling controls; retain every other native indicator. */
 body:has(.tide-overview) #indicators>[data-indicator="poll-status"]{display:none}
+
+/* Applying configuration uses both classes; do not inherit inline-alert margins. */
+.modal.alert-message{margin:auto;max-width:560px;width:100%;padding:24px;border-radius:14px}

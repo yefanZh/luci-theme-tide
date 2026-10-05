@@ -111,6 +111,23 @@ try {
     await page.getByRole('combobox',{name:'Appearance',exact:true}).selectOption('light');
     await page.waitForFunction(()=>!document.documentElement.classList.contains('dark'));
   });
+  await check('configuration apply alert is centered on desktop and narrow screens, and long dialogs remain scrollable',async()=>{
+    for(const width of [320,390,1440]) {
+      await page.setViewportSize({width,height:844});
+      await page.evaluate(()=>fixture.applyStatus());
+      await page.waitForFunction(()=>!document.querySelector('.modal').getAnimations().some(a=>a.playState==='running'));
+      const position=await page.locator('.modal.alert-message').boundingBox();
+      assert.ok(Math.abs(position.x+position.width/2-width/2)<2,JSON.stringify(position));
+      assert.ok(Math.abs(position.y+position.height/2-422)<2,JSON.stringify(position));
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+      if(width===1440)await page.screenshot({path:path.join(output,'apply-status-centered.png'),fullPage:false});
+      await page.evaluate(()=>ui.hideModal());
+    }
+    await page.evaluate(()=>{ui.showModal('长内容',E('pre',{},['Long content\n'.repeat(200)]));});
+    assert.ok(await page.locator('.modal').evaluate(el=>el.getBoundingClientRect().top>=0));
+    assert.ok(await page.locator('#modal_overlay').evaluate(el=>el.scrollHeight>el.clientHeight));
+    await page.evaluate(()=>ui.hideModal());
+  });
   await check('nested SectionValue DHCP modal spans its grid and uses capsules at desktop and mobile sizes',async()=>{
     for(const width of [390,820,1099,1440]) {
       await page.setViewportSize({width,height:1000});
