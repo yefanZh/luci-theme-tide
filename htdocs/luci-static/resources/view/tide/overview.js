@@ -73,12 +73,15 @@ return view.extend({
 			self.pauseButton.textContent = self.paused ? _('Resume') : _('Pause');
 			self.pauseButton.setAttribute('aria-pressed',String(self.paused));
 			self.sampleStatus.textContent = self.paused ? _('Sampling paused') : _('Sampling every 5 seconds');
+			self.updateFreshness();
 			if (!self.paused) self.refresh(true);
 		}},_('Pause'));
 		this.errorBox = E('div',{'class':'alert-message error','role':'alert',hidden:''});
 		this.heroTitle = node('h2','',_('Loading…')); this.heroDescription = node('p','');
 		this.stationCount = node('strong','','—');
 		this.sampleStatus = node('small','',_('Sampling every 5 seconds'));
+		this.freshness = E('span',{'class':'tide-freshness','role':'status'},_('Loading…'));
+		this.chartNote = node('p','tide-chart-note',''); this.chartNote.hidden = true;
 		this.rxValue = node('strong','','—'); this.txValue = node('strong','','—'); this.totalValue = node('strong','','—');
 		this.totalUnit = node('span','','');
 		function metric(label, value, unit, note) {
@@ -93,14 +96,14 @@ return view.extend({
 		this.rangeSelect = E('select',{'aria-label':_('Traffic time range'),'change':function() { self.range = +self.rangeSelect.value; self.updateChart(true); }},[
 			E('option',{value:'60'},_('1 minute')), E('option',{value:'300',selected:''},_('5 minutes')), E('option',{value:'600'},_('10 minutes'))
 		]);
-		this.rangeSelect.style.cssText = 'width:auto;min-height:32px;font-size:11px;padding:4px 8px';
+		this.rangeSelect.classList.add('tide-range');
 		var trafficPanel = this.panel(_('Traffic'),null,null,[
 			node('div','tide-metrics',[
 				metric(_('Download'),this.rxValue,'Mbit/s',_('Current WAN rate')),
 				metric(_('Upload'),this.txValue,'Mbit/s',_('Current WAN rate')),
 				metric(_('Transferred'),this.totalValue,this.totalUnit,_('Interface counters'))
 			]),
-			node('div','tide-chart',[this.chartEmpty,this.chart,node('div','tide-chart-axis',[this.chartStart,this.chartScale,this.chartEnd])]),
+			node('div','tide-chart',[this.chartEmpty,this.chart,node('div','tide-chart-axis',[this.chartStart,this.chartScale,this.chartEnd]),this.chartNote]),
 			node('div','tide-chart-legend',[
 				node('span','',[node('i','tide-legend-dot'),_('Download')]),node('span','',[node('i','tide-legend-dot secondary'),_('Upload')])
 			])
@@ -112,7 +115,7 @@ return view.extend({
 		this.deviceBody = node('tbody','');
 		this.deviceSearch = E('input',{type:'search','class':'tide-device-search',placeholder:_('Search name, IP or MAC'),'aria-label':_('Search devices'),'input':function() { self.updateDevices(); }});
 		this.deviceEmpty = node('div','tide-empty');
-		this.deviceNote = node('p','tide-muted'); this.deviceNote.style.fontSize = '11px';
+		this.deviceNote = node('p','tide-muted'); this.deviceNote.style.fontSize = '13px';
 		var deviceTable = node('table','tide-device-table',[
 			node('thead','',node('tr','',[
 				node('th','',_('Device')),node('th','hide-mobile',_('IP address')),node('th','',_('Status'))
@@ -122,7 +125,7 @@ return view.extend({
 		this.root.append(
 			node('div','tide-page-heading',[
 				node('div','',[node('h1','',_('Network overview')),node('p','',_('Your network, at a glance.'))]),
-				node('div','tide-heading-actions',[this.pauseButton,this.refreshButton])
+				node('div','tide-refresh-group',[this.freshness,node('div','tide-heading-actions',[this.pauseButton,this.refreshButton])])
 			]),this.errorBox,
 			node('section','tide-hero',[
 				node('div','tide-hero-head',[node('span','tide-hero-mark',Tide.icon('network')),node('div','',[this.heroTitle,this.heroDescription])]),
@@ -137,6 +140,25 @@ return view.extend({
 			]),
 			node('p','tide-muted',E('a',{href:L.url('admin/status/overview')},_('Open native status overview and plugin details')))
 		);
+		this.chartWrap = trafficPanel.querySelector('.tide-chart');
+		this.chartWrap.setAttribute('tabindex','0');
+		this.chartWrap.setAttribute('aria-label',_('Traffic samples. Use left and right arrows to inspect.'));
+		this.chartTooltip = E('div',{'class':'tide-chart-tooltip',hidden:''});
+		this.chartWrap.appendChild(this.chartTooltip);
+		this.chartWrap.addEventListener('pointermove',function(event) {
+			var rect = self.chart.getBoundingClientRect();
+			var samples = self.visibleSamples || [];
+			if (!samples.length) return;
+			var target = samples[0].time + Math.max(0,Math.min(1,(event.clientX - rect.left) / rect.width)) * (samples[samples.length - 1].time - samples[0].time);
+			var index = 0; samples.forEach(function(sample,i) { if (Math.abs(sample.time - target) < Math.abs(samples[index].time - target)) index = i; });
+			self.inspectChart(index);
+		});
+		this.chartWrap.addEventListener('pointerleave',function() { if (document.activeElement !== self.chartWrap) self.chartTooltip.hidden = true; });
+		this.chartWrap.addEventListener('focus',function() { self.inspectChart((self.visibleSamples || []).length - 1); });
+		this.chartWrap.addEventListener('blur',function() { self.chartTooltip.hidden = true; });
+		this.chartWrap.addEventListener('keydown',function(event) {
+			if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); self.inspectChart((self.inspectedIndex || 0) + (event.key === 'ArrowRight' ? 1 : -1)); }
+		});
 		if (data.error) this.showError(data.error); else this.update(data);
 		this.pollFn = function() { if (!self.paused && !document.hidden && self.root.isConnected) return self.refresh(false); };
 		poll.add(this.pollFn,5);
@@ -144,7 +166,7 @@ return view.extend({
 		return this.root;
 	},
 	showError: function(error) {
-		this.previous = null;
+		this.previous = null; this.stale = true; this.updateFreshness();
 		this.heroTitle.textContent = this.data ? _('Status data is stale') : _('Status unavailable');
 		this.errorBox.hidden = false;
 		dom.content(this.errorBox,[
@@ -155,7 +177,7 @@ return view.extend({
 	refresh: function(manual) {
 		if (this.request) return this.request;
 		var self = this;
-		if (manual) { this.refreshButton.disabled = true; this.refreshButton.classList.add('spinning'); }
+		if (manual) { this.freshness.textContent = _('Refreshing…'); this.refreshButton.disabled = true; this.refreshButton.classList.add('spinning'); }
 		this.request = this.fetchData().then(function(data) {
 			self.errorBox.hidden = true; self.update(data);
 			if (manual) Tide.announce(_('Status refreshed'));
@@ -165,7 +187,7 @@ return view.extend({
 		return this.request;
 	},
 	update: function(data) {
-		var initial = !this.data; this.data = data;
+		var initial = !this.data; this.data = data; this.stale = false; this.updateFreshness();
 		var self = this, wans = data.wan.concat(data.wan6), devices = new Map();
 		var active = Array.from(new Map(wans.filter(function(net) { return net.isUp(); }).map(function(net) { return [net.getName(),net]; })).values());
 		active.forEach(function(net) { var dev = net.getL3Device(); if (dev) devices.set(dev.getName(),dev); });
@@ -214,10 +236,25 @@ return view.extend({
 		if (initial) setTimeout(function() { self.memoryMeter.classList.remove('initial'); },850);
 		this.updateChart(initial); this.updateDevices(); this.updateWifi();
 	},
+	updateFreshness: function() {
+		if (!this.freshness) return;
+		this.freshness.textContent = (this.stale ? _('Data is stale') : this.paused ? _('Sampling paused') : _('Last updated')) + (this.data ? ' · ' + new Date(this.data.time).toLocaleTimeString() : '');
+	},
+	inspectChart: function(index) {
+		var samples = this.visibleSamples || [];
+		if (!samples.length || this.chart.style.display === 'none') { this.chartTooltip.hidden = true; return; }
+		this.inspectedIndex = Math.max(0,Math.min(samples.length - 1,index));
+		var sample = samples[this.inspectedIndex];
+		this.chartTooltip.textContent = new Date(sample.time).toLocaleTimeString() + ' · ' + (sample.rx == null ? _('No sample available') : _('Download') + ' ' + number(sample.rx) + ' / ' + _('Upload') + ' ' + number(sample.tx) + ' Mbit/s');
+		this.chartTooltip.hidden = false;
+	},
 	updateChart: function(animate) {
 		if (!this.data) return;
 		var end = this.data.time, samples = this.samples.filter(L.bind(function(sample) { return sample.time >= end - this.range * 1000; },this));
+		this.visibleSamples = samples;
 		var valid = samples.filter(function(sample) { return sample.rx != null; });
+		var missing = samples.some(function(sample,index) { return index > 0 && (sample.rx == null || sample.time - samples[index - 1].time > 15000); });
+		this.chartNote.hidden = !missing; this.chartNote.textContent = _('Gaps indicate missing samples, not zero traffic.');
 		this.chart.style.display = valid.length < 2 ? 'none' : '';
 		this.chartEmpty.hidden = valid.length >= 2;
 		var max = Math.max(1,...valid.map(function(sample) { return Math.max(sample.rx,sample.tx); }));
@@ -235,17 +272,10 @@ return view.extend({
 		this.rxPath.setAttribute('d',path('rx')); this.txPath.setAttribute('d',path('tx'));
 		/* A gap remains a gap; do not shade across unavailable samples. */
 		this.area.setAttribute('d',samples.every(function(sample) { return sample.rx != null; }) && valid.length >= 2 ? path('rx') + 'L600,146L0,146Z' : '');
-		animate = animate || (!this.chartDrawn && valid.length >= 2);
-		if (animate && Tide.motion() && valid.length >= 2) {
-			this.chartDrawn = true;
-			[this.rxPath,this.txPath].forEach(function(line) {
-				var length = line.getTotalLength(); line.style.setProperty('--path-length',String(length));
-				line.style.strokeDasharray = String(length); line.style.animation = 'none';
-				requestAnimationFrame(function() { line.style.animation = 'tide-trace 1000ms var(--ease)'; });
-			});
-		} else {
-			[this.rxPath,this.txPath].forEach(function(line) { line.style.animation = ''; line.style.strokeDasharray = ''; });
-		}
+		/* Polling and range changes update real paths without replaying a draw animation. */
+		[this.rxPath,this.txPath].forEach(function(line) { line.style.animation = ''; line.style.strokeDasharray = ''; });
+		if (this.chartTooltip && !this.chartTooltip.hidden) this.inspectChart(this.inspectedIndex);
+
 	},
 	updateDevices: function() {
 		if (!this.data) return;
@@ -324,7 +354,7 @@ return view.extend({
 		if (!dialog || dialog.classList.contains('closing')) return;
 		if (!Tide.motion()) { dialog.close(); return; }
 		dialog.classList.add('closing');
-		setTimeout(function() { if (dialog.open) dialog.close(); },220);
+		setTimeout(function() { if (dialog.open) dialog.close(); },160);
 	},
 	handleSaveApply: null,
 	handleSave: null,

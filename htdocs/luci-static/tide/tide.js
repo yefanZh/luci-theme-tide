@@ -4,8 +4,8 @@
 	var root = document.documentElement;
 	var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 	var reduced = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-	var mobile = window.matchMedia ? window.matchMedia('(max-width: 680px)') : null;
-	var transition = null, themeSequence = 0;
+	var mobile = window.matchMedia ? window.matchMedia('(max-width: 820px)') : null;
+
 	function read(key, fallback) { try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; } }
 	function write(key, value) { try { localStorage.setItem(key, value); } catch (_) {} }
 	function listen(query, fn) { if (!query) return; if (query.addEventListener) query.addEventListener('change', fn); else if (query.addListener) query.addListener(fn); }
@@ -18,21 +18,9 @@
 		root.dataset.appearance = mode;
 		document.querySelectorAll('.tide-appearance').forEach(function(select) { select.value = mode; });
 	}
-	function setTheme(mode, event) {
+	function setTheme(mode) {
 		if (['system', 'light', 'dark'].indexOf(mode) < 0) return;
-		write('tide.appearance', mode);
-		var seq = ++themeSequence;
-		if (transition) transition.skipTransition();
-		var trigger = event && event.target;
-		var rect = trigger && trigger.getBoundingClientRect();
-		root.style.setProperty('--click-x', (event && event.clientX || rect && rect.left + rect.width / 2 || innerWidth / 2) + 'px');
-		root.style.setProperty('--click-y', (event && event.clientY || rect && rect.top + rect.height / 2 || 0) + 'px');
-		if (document.startViewTransition && motion()) {
-			transition = document.startViewTransition(function() { if (seq === themeSequence) applyTheme(mode); });
-			transition.ready.catch(function() {});
-			transition.updateCallbackDone.catch(function() {});
-			transition.finished.catch(function() {}).finally(function() { if (seq === themeSequence) transition = null; });
-		} else applyTheme(mode);
+		write('tide.appearance', mode); applyTheme(mode);
 	}
 	function icon(name) {
 		var paths = {
@@ -81,25 +69,6 @@
 		if (open) sidebar.querySelector('.tide-nav-close').focus();
 		else if (restoreFocus !== false && opener && opener.isConnected) opener.focus();
 	}
-	function clickEffects(event) {
-		if (!motion() || document.hidden) return;
-		var btn = event.target.closest('button,.btn,.cbi-button');
-		if (!btn || btn.disabled || btn.classList.contains('tide-nav-overlay')) return;
-		var rect = btn.getBoundingClientRect(), size = Math.max(rect.width, rect.height) * 1.8;
-		var x = event.detail ? event.clientX : rect.left + rect.width / 2;
-		var y = event.detail ? event.clientY : rect.top + rect.height / 2;
-		var ripple = document.createElement('span'); ripple.className = 'tide-ripple';
-		ripple.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + (x - rect.left - size / 2) + 'px;top:' + (y - rect.top - size / 2) + 'px;clip-path:inset(0 round 7px)';
-		btn.appendChild(ripple); setTimeout(function() { ripple.remove(); }, 580);
-		if (btn.matches('.cbi-button-apply,.tide-primary')) {
-			for (var i = 0; i < 5; i++) {
-				var dot = document.createElement('span'), angle = i * Math.PI * 2 / 5;
-				dot.className = 'tide-click-burst'; dot.style.left = x + 'px'; dot.style.top = y + 'px';
-				dot.style.setProperty('--dx', Math.cos(angle) * 24 + 'px'); dot.style.setProperty('--dy', Math.sin(angle) * 24 + 'px');
-				document.body.appendChild(dot); setTimeout(function(el) { el.remove(); }, 560, dot);
-			}
-		}
-	}
 	function init() {
 		applyTheme(root.dataset.appearance || 'system');
 		document.querySelectorAll('.tide-appearance').forEach(function(select) { select.addEventListener('change', function(event) { setTheme(select.value, event); }); });
@@ -113,7 +82,7 @@
 			});
 		}
 		listen(media, function() { if (root.dataset.appearance === 'system') setTheme('system'); });
-		listen(reduced, function() { if (!motion() && transition) transition.skipTransition(); });
+
 		var sidebar = document.getElementById('tide-sidebar');
 		if (sidebar) {
 			sidebar.inert = !!(mobile && mobile.matches);
@@ -132,7 +101,7 @@
 			}
 		});
 		document.addEventListener('focusin', function(event) { if (menuOpen && !sidebar.contains(event.target)) sidebar.querySelector('.tide-nav-close').focus(); });
-		document.addEventListener('click', clickEffects);
+
 		document.addEventListener('visibilitychange', function() { document.body.classList.toggle('tide-hidden', document.hidden); });
 		/* Observe the busy state LuCI already sets. No request, submit or RPC interception. */
 		var main = document.getElementById('maincontent'), line = document.getElementById('tide-loadline'), frame = 0;
@@ -146,7 +115,36 @@
 			new MutationObserver(function() { if (!frame) frame = requestAnimationFrame(syncBusy); }).observe(main, { subtree:true, childList:true, attributes:true, attributeFilter:['class','aria-busy'] });
 			syncBusy();
 		}
-		if (main && motion()) main.classList.add('tide-page-enter');
+		/* Preserve native tab/link handlers; only observe selection and geometry. */
+		var tabFrame = 0;
+		function syncTabs() {
+			tabFrame = 0;
+			document.querySelectorAll('.tabs,.cbi-tabmenu').forEach(function(bar) {
+				var active = bar.querySelector(':scope > li.active,:scope > li.cbi-tab');
+				if (!active || !bar.getClientRects().length) return;
+				var rect = active.getBoundingClientRect(), parent = bar.getBoundingClientRect();
+				bar.style.setProperty('--tide-tab-x', (rect.left - parent.left + bar.scrollLeft) + 'px');
+				bar.style.setProperty('--tide-tab-width', rect.width + 'px');
+				if (!bar.classList.contains('tide-tabs-ready')) bar.classList.add('tide-tabs-ready');
+				if (bar._tideActive !== active) {
+					/* Initial positioning is immediate; only later selections slide. */
+					if (!bar._tideActive) bar.classList.add('tide-tabs-initial');
+					bar._tideActive = active;
+					bar.scrollLeft = Math.max(0,Math.min(bar.scrollLeft,active.offsetLeft));
+					if (rect.right > parent.right) bar.scrollLeft += rect.right - parent.right + 5;
+					requestAnimationFrame(function() { bar.classList.remove('tide-tabs-initial'); });
+				}
+			});
+			document.querySelectorAll('.modal').forEach(function(modal) {
+				var form = !!modal.querySelector(':scope > .cbi-map');
+				if (modal.classList.contains('tide-form-modal') !== form) modal.classList.toggle('tide-form-modal',form);
+			});
+		}
+		function scheduleTabs() { if (!tabFrame) tabFrame = requestAnimationFrame(syncTabs); }
+		if (window.MutationObserver) new MutationObserver(scheduleTabs).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','aria-selected']});
+		window.addEventListener('resize',scheduleTabs);
+		if (document.fonts) document.fonts.ready.then(scheduleTabs);
+		scheduleTabs();
 		window.addEventListener('pageshow', function() { if (main) main.classList.remove('tide-page-leave'); });
 	}
 	window.Tide = { icon:icon, motion:motion, setTheme:setTheme, setMenu:setMenu, announce:announce, read:read, write:write };

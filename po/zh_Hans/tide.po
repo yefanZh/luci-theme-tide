@@ -300,3 +300,21 @@ msgstr "网络状态，清晰可见。"
 
 msgid "unlimited"
 msgstr "不限"
+
+msgid "Last updated"
+msgstr "最后更新"
+
+msgid "Data is stale"
+msgstr "数据已过期"
+
+msgid "Refreshing…"
+msgstr "正在刷新…"
+
+msgid "No sample available"
+msgstr "暂无采样"
+
+msgid "Gaps indicate missing samples, not zero traffic."
+msgstr "曲线空白表示缺少采样，不代表零流量。"
+
+msgid "Traffic samples. Use left and right arrows to inspect."
+msgstr "流量采样。使用左右方向键查看。"

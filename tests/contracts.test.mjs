@@ -86,7 +86,7 @@ function contrast(a,b) {const x=luminance(a),y=luminance(b);return (Math.max(x,y
 test('approved foreground and status tokens meet contrast requirements',()=>{
   for(const colors of [
     {bg:'#f2f6fb',panel:'#ffffff',ink:'#172a43',muted:'#5e7087',accent:'#245fce',on:'#ffffff',success:'#217660',soft:'#e9f0fc',hero:'#dce9fa',heroMuted:'#4e627a',error:'#a7463d',warning:'#995b3f',chart:'#668aaa'},
-    {bg:'#1b2023',panel:'#242b2f',ink:'#ecefe9',muted:'#a6b0b2',accent:'#e3b779',on:'#282521',success:'#a6c8ac',soft:'#37342e',hero:'#303532',heroMuted:'#a6b0b2',error:'#eea29a',warning:'#e3b779',chart:'#9eaab4'}
+    {bg:'#1b2023',panel:'#242b2f',ink:'#ecefe9',muted:'#adb7ba',accent:'#e3b779',on:'#282521',success:'#a6c8ac',soft:'#37342e',hero:'#303532',heroMuted:'#a6b0b2',error:'#eea29a',warning:'#e3b779',chart:'#9eaab4'}
   ]) {
     for(const foreground of ['ink','muted','error','warning']) for(const background of ['bg','panel']) assert.ok(contrast(colors[foreground],colors[background])>=4.5,foreground+'/'+background);
     assert.ok(contrast(colors.on,colors.accent)>=4.5,'primary button');

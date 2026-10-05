@@ -19,6 +19,7 @@ export function createServer() {
     const url = new URL(req.url,'http://localhost');
     let file;
     if (url.pathname.startsWith('/cgi-bin/luci/admin/translations/')) { res.setHeader('Content-Type','text/javascript'); res.end(''); return; }
+    if (url.pathname === '/interface') { res.setHeader('Content-Type','text/html; charset=utf-8'); res.end(html.replace('</body>','<script>fixture.ready.then(function(){fixture.interfaceModal();});</script></body>')); return; }
     if (url.pathname === '/login') { res.setHeader('Content-Type','text/html; charset=utf-8'); res.end(login); return; }
     if (url.pathname.startsWith('/cgi-bin/') || url.pathname === '/') { res.setHeader('Content-Type','text/html; charset=utf-8'); res.end(html); return; }
     if (url.pathname === '/fixture.js') file = path.join(root,'tests/fixture.js');

@@ -7,7 +7,7 @@
 		</div>
 	</div>
 	<button type="button" class="tide-nav-overlay" aria-label="{{ _('Close menu') }}" tabindex="-1" hidden></button>
-	<script>L.require('menu-tide');</script>
+	<script>L.env.resource_version = (L.env.resource_version || '') + '-tide-refinement-20261005'; L.require('menu-tide');</script>
 {% endif %}
 	<div id="tide-loadline" role="progressbar" aria-label="{{ _('Loading') }}" hidden></div>
 	<div id="tide-announcement" class="tide-sr-only" role="status" aria-live="polite"></div>

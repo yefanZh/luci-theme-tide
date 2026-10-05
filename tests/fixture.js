@@ -13,8 +13,8 @@ var ui = {
 		return Object.entries(node.children || {}).filter(function(pair) { return pair[1].satisfied && pair[1].title != null; })
 			.map(function(pair) { return Object.assign(pair[1],{name:pair[0]}); }).sort(function(a,b) { return (a.order || 0) - (b.order || 0); });
 	}},
-	showModal:function(title,content) { var el = E('div',{'class':'modal'},[E('h4',{},[title]),content]); document.body.appendChild(el); return el; },
-	hideModal:function() { var el = document.querySelector('.modal'); if (el) el.remove(); }
+	showModal:function(title,content) { ui.hideModal(); var el = E('div',{'class':'modal',role:'dialog','aria-modal':'true'},[E('h4',{},[title])].concat(content)); document.body.appendChild(E('div',{id:'modal_overlay',tabindex:-1},el)); document.body.classList.add('modal-overlay-active'); return el; },
+	hideModal:function() { var el = document.querySelector('#modal_overlay'); if (el) el.remove(); document.body.classList.remove('modal-overlay-active'); }
 };
 var rpc = {declare:function(spec) { return function() {
 	fixture.rpcCalls++;
@@ -73,4 +73,25 @@ fixture.form = function() {
 	]);
 	var section = E('section',{'class':'cbi-section'},[value,table]);
 	document.getElementById('view').replaceChildren(E('div',{'class':'cbi-map'},[E('h2',{},['系统设置']),section,E('div',{'class':'cbi-page-actions'},E('button',{'class':'cbi-button cbi-button-apply'},['保存并应用']))]));
+};
+/* Native SectionValue shape: its section is the sole child of a cbi-value. */
+fixture.interfaceModal = function() {
+	function tabs(labels,selected) { return E('ul',{'class':'cbi-tabmenu'},labels.map(function(label,i){return E('li',{'class':i===selected?'cbi-tab':'cbi-tab-disabled'},E('a',{href:'#','click':function(event){event.preventDefault();this.parentNode.parentNode.querySelectorAll('li').forEach(function(li){li.className='cbi-tab-disabled';});this.parentNode.className='cbi-tab';}},[label]));})); }
+	function field(label,id,checkbox,description) { return E('div',{'class':'cbi-value'},[
+		E('label',{'class':'cbi-value-title',for:id},[label]),E('div',{'class':'cbi-value-field'},[
+			checkbox?E('input',{id:id,type:'checkbox'}):E('select',{id:id},[E('option',{},['已禁用']),E('option',{},['服务器模式'])]),
+			E('div',{'class':'cbi-value-description'},[description])
+		])
+	]); }
+	var nested=E('div',{'class':'cbi-section-node'},[
+		tabs(['常规设置','IPv4 设置','IPv6 设置'],2),
+		field('指定的主接口','fixture-master',true,'将此接口设为 RA 和 DHCPv6 中继及 NDP 代理的主接口。'),
+		field('RA 服务','fixture-ra',false,'配置此接口上 RA 服务的操作模式。'),
+		field('DHCPv6 服务','fixture-dhcp6',false,'配置此接口上 DHCPv6 服务的操作模式。')
+	]);
+	var map=E('div',{'class':'cbi-map'},E('section',{'class':'cbi-section'},E('div',{'class':'cbi-section-node'},[
+		tabs(['通用设置','高级设置','防火墙设置','DHCP 服务器'],3),
+		E('div',{'class':'cbi-value','data-widget':'SectionValue'},E('section',{'class':'cbi-section'},nested))
+	])));
+	ui.showModal('接口 » lan',[map,E('div',{'class':'button-row'},[E('button',{'class':'btn','click':function(){ui.hideModal();}},['取消']),E('button',{'class':'btn cbi-button-apply','click':function(){}},['保存'])])]);
 };

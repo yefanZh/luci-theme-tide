@@ -29,6 +29,21 @@ try {
     assert.equal(await page.locator('.tide-meter span').evaluate(el=>getComputedStyle(el).transitionProperty),'transform');
     assert.equal(await page.locator('.tide-meter span').evaluate(el=>el.offsetWidth===el.parentElement.clientWidth),true);
   });
+  await check('overview hides only duplicate polling and exposes timestamp, gaps and keyboard sample readout',async()=>{
+    await page.evaluate(()=>{
+      document.querySelector('#indicators').append(E('span',{'data-indicator':'poll-status'},['Refreshing']),E('span',{'data-indicator':'uci-changes'},['Unsaved Changes: 1']));
+    });
+    assert.equal(await page.locator('[data-indicator="poll-status"]').isVisible(),false);
+    assert.equal(await page.locator('[data-indicator="uci-changes"]').isVisible(),true);
+    assert.match(await page.locator('.tide-freshness').textContent(),/Last updated/);
+    await page.evaluate(async()=>{fixture.time+=20000;await fixture.step();await fixture.step();});
+    assert.equal(await page.locator('.tide-chart-note').isVisible(),true);
+    await page.locator('.tide-chart').focus();await page.keyboard.press('ArrowLeft');
+    assert.equal(await page.locator('.tide-chart-tooltip').isVisible(),true);
+    assert.ok(await page.locator('.tide-chart-tooltip').textContent());
+    await page.locator('.tide-chart').blur();
+    await page.locator('#indicators').evaluate(el=>el.replaceChildren());
+  });
   await check('45 plugin entries, deep menus, ACL filtering and independent scrolling',async()=>{
     await page.getByRole('button',{name:'服务',exact:true}).click();
     assert.equal(await page.locator('.tide-nav a').count(),52);
@@ -95,6 +110,32 @@ try {
     await page.getByRole('combobox',{name:'Appearance',exact:true}).selectOption('dark');
     await page.getByRole('combobox',{name:'Appearance',exact:true}).selectOption('light');
     await page.waitForFunction(()=>!document.documentElement.classList.contains('dark'));
+  });
+  await check('nested SectionValue DHCP modal spans its grid and uses capsules at desktop and mobile sizes',async()=>{
+    for(const width of [390,820,1099,1440]) {
+      await page.setViewportSize({width,height:1000});
+      await page.evaluate(()=>fixture.interfaceModal());
+      await page.waitForFunction(()=>document.querySelector('.modal.tide-form-modal'));
+      const sizes=await page.evaluate(()=>{
+        const section=document.querySelector('[data-widget="SectionValue"]>.cbi-section');
+        const field=document.querySelector('#fixture-ra').parentElement;
+        const help=field.querySelector('.cbi-value-description');
+        const tab=document.querySelector('.modal .cbi-tab-disabled');
+        return {section:section.getBoundingClientRect().width,field:field.getBoundingClientRect().width,help:help.getBoundingClientRect().width,image:getComputedStyle(tab).backgroundImage,tabHeight:tab.getBoundingClientRect().height,overflow:document.documentElement.scrollWidth>innerWidth};
+      });
+      assert.ok(sizes.section>270,JSON.stringify(sizes));
+      assert.ok(sizes.field>250,JSON.stringify(sizes));
+      assert.ok(sizes.help>230,JSON.stringify(sizes));
+      assert.equal(sizes.image,'none'); assert.ok(sizes.tabHeight>=40);assert.equal(sizes.overflow,false);
+      await page.locator('#fixture-ra').selectOption({label:'服务器模式'});
+      await page.getByRole('combobox',{name:'Appearance',exact:true}).selectOption('dark');
+      assert.equal(await page.locator('#fixture-ra').inputValue(),'服务器模式');
+      await page.locator('.modal .cbi-tabmenu').first().getByRole('link',{name:'通用设置',exact:true}).click();
+      await page.waitForFunction(()=>document.querySelector('.modal .cbi-tabmenu .cbi-tab').textContent==='通用设置');
+      assert.equal(await page.locator('.tide-click-burst').count(),0);
+      if([390,1440].includes(width)) await page.screenshot({path:path.join(output,'interface-dark-'+width+'.png'),fullPage:true});
+      await page.evaluate(()=>ui.hideModal());
+    }
   });
   await check('320–1920px overview and plugin forms contain horizontal overflow',async()=>{
     for(const width of [320,390,680,768,980,1024,1280,1440,1920]) {
